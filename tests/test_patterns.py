@@ -136,6 +136,16 @@ def test_disagreeing_counts_passes_on_agreement():
     assert verdict == verdicts.PASS
 
 
+def test_reader_limit_no_false_positive_on_install():
+    """Regression: 'install' contains 'all' as a substring; the totalizing
+    match must use word boundaries."""
+    pattern = BY_NAME["reader_limit_as_system"]
+    check = {"name": "deploy check", "claim": "no errors after install",
+             "evidence_how": "read last 100 lines", "reader_limits": "100 lines"}
+    verdict, _ = pattern.check(ctx([check]))
+    assert verdict == verdicts.PASS
+
+
 def test_all_patterns_not_applicable_on_empty_harness():
     for name, pattern in BY_NAME.items():
         verdict, _ = pattern.check(ctx())

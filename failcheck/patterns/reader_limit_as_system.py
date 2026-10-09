@@ -7,6 +7,8 @@ reader has a window; the failure is promoting the window to the world.
 What you didn't read is not evidence of anything.
 """
 
+import re
+
 from failcheck import verdicts
 
 NAME = "reader_limit_as_system"
@@ -23,7 +25,9 @@ REMEDY = (
 )
 
 # Words that make a claim about the whole system rather than what was read.
-TOTALIZING = ("all", "every", "anywhere", "entire", "whole", "system")
+# Matched on word boundaries: substring matching false-positives on words
+# like "install" (contains "all").
+TOTALIZING = re.compile(r"\b(all|every|anywhere|entire|whole|system)\b")
 
 
 def check(harness_context):
@@ -36,8 +40,7 @@ def check(harness_context):
         if not limits:
             continue
         evaluable += 1
-        lowered = claim.lower()
-        if any(word in lowered for word in TOTALIZING):
+        if TOTALIZING.search(claim.lower()):
             offenders.append(
                 f"{c.get('name', '?')} reads only {limits!r}, "
                 f"claims {claim!r}"
